@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	eurek8sv1 "github.com/eurek8s/controller/api/v1"
+	discoveryv1 "github.com/eurek8s/controller/api/v1"
 )
 
 // EurekaApplicationReconciler reconciles a EurekaApplication object
@@ -33,9 +33,9 @@ type EurekaApplicationReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=eurek8s.github.io,resources=eurekaapplications,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=eurek8s.github.io,resources=eurekaapplications/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=eurek8s.github.io,resources=eurekaapplications/finalizers,verbs=update
+//+kubebuilder:rbac:groups=discovery.eurek8s.com,resources=eurekaapplications,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=discovery.eurek8s.com,resources=eurekaapplications/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=discovery.eurek8s.com,resources=eurekaapplications/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -57,6 +57,6 @@ func (r *EurekaApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Re
 // SetupWithManager sets up the controller with the Manager.
 func (r *EurekaApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&eurek8sv1.EurekaApplication{}).
+		For(&discoveryv1.EurekaApplication{}).
 		Complete(r)
 }

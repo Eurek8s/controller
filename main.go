@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	eurek8sv1 "github.com/eurek8s/controller/api/v1"
+	discoveryv1 "github.com/eurek8s/controller/api/v1"
 	"github.com/eurek8s/controller/controllers"
 	//+kubebuilder:scaffold:imports
 )
@@ -44,7 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(eurek8sv1.AddToScheme(scheme))
+	utilruntime.Must(discoveryv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -71,7 +71,7 @@ func main() {
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "732c6e2c.github.com/eurek8s/controller",
+		LeaderElectionID:       "732c6e2c.eurek8s.com",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")

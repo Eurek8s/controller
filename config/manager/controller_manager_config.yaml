@@ -8,4 +8,4 @@ webhook:
   port: 9443
 leaderElection:
   leaderElect: true
-  resourceName: 732c6e2c.github.com/eurek8s/controller
+  resourceName: 732c6e2c.eurek8s.com

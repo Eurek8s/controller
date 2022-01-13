@@ -5,7 +5,7 @@ metadata:
   name: eurekaapplication-editor-role
 rules:
 - apiGroups:
-  - eurek8s.eurek8s.github.io
+  - discovery.eurek8s.com
   resources:
   - eurekaapplications
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - eurek8s.eurek8s.github.io
+  - discovery.eurek8s.com
   resources:
   - eurekaapplications/status
   verbs:

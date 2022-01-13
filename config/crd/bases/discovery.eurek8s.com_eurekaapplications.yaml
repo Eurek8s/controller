@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.7.0
   creationTimestamp: null
-  name: eurekaapplications.eurek8s.github.io
+  name: eurekaapplications.discovery.eurek8s.com
 spec:
-  group: eurek8s.github.io
+  group: discovery.eurek8s.com
   names:
     kind: EurekaApplication
     listKind: EurekaApplicationList
@@ -36,47 +36,13 @@ spec:
           spec:
             description: EurekaApplicationSpec defines the desired state of EurekaApplication
             properties:
-              appName:
-                description: Name of the app to be registered in Eureka
-                minLength: 0
-                type: string
-              disabled:
-                description: Enable/Disable specific instance
-                type: boolean
-              environment:
-                description: Environment that should be used to register the instance
-                type: string
-              ingressName:
-                description: Name of the ingress app to be registered in Eureka
-                minLength: 0
-                type: string
-              paths:
-                description: Paths to register along with the instance
-                properties:
-                  healthcheck:
-                    description: HealthCheck path to be registered in Eureka (i.e
-                      /actuator/health)
-                    minLength: 0
-                    type: string
-                  home:
-                    description: Home path to be registered in Eureka (i.e /)
-                    minLength: 0
-                    type: string
-                  status:
-                    description: Status path to be registered in Eureka (i.e /actuator/info)
-                    minLength: 0
-                    type: string
-                type: object
-              zone:
-                description: Zone of the app to be registered in Eureka
+              foo:
+                description: Foo is an example field of EurekaApplication. Edit eurekaapplication_types.go
+                  to remove/update
                 type: string
             type: object
           status:
             description: EurekaApplicationStatus defines the observed state of EurekaApplication
-            properties:
-              lastReconcileTime:
-                format: date-time
-                type: string
             type: object
         type: object
     served: true

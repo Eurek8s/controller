@@ -4,4 +4,4 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-  name: eurekaapplications.eurek8s.eurek8s.github.io
+  name: eurekaapplications.discovery.eurek8s.com
