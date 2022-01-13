@@ -1,0 +1,6 @@
+domain: github.com/eurek8s/controller
+layout:
+- go.kubebuilder.io/v3
+projectName: eurek8s-controller-v3
+repo: github.com/eurek8s/controller
+version: "3"
