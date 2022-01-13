@@ -1,0 +1,24 @@
+# permissions for end users to edit eurekaapplications.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: eurekaapplication-editor-role
+rules:
+- apiGroups:
+  - eurek8s.eurek8s.github.io
+  resources:
+  - eurekaapplications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - eurek8s.eurek8s.github.io
+  resources:
+  - eurekaapplications/status
+  verbs:
+  - get

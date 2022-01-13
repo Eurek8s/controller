@@ -1,0 +1,20 @@
+# permissions for end users to view eurekaapplications.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: eurekaapplication-viewer-role
+rules:
+- apiGroups:
+  - eurek8s.eurek8s.github.io
+  resources:
+  - eurekaapplications
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - eurek8s.eurek8s.github.io
+  resources:
+  - eurekaapplications/status
+  verbs:
+  - get
