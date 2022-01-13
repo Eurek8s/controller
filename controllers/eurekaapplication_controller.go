@@ -33,9 +33,9 @@ type EurekaApplicationReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=eurek8s.eurek8s.github.io,resources=eurekaapplications,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=eurek8s.eurek8s.github.io,resources=eurekaapplications/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=eurek8s.eurek8s.github.io,resources=eurekaapplications/finalizers,verbs=update
+//+kubebuilder:rbac:groups=eurek8s.github.io,resources=eurekaapplications,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=eurek8s.github.io,resources=eurekaapplications/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=eurek8s.github.io,resources=eurekaapplications/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

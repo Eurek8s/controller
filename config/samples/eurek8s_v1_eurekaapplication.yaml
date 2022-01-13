@@ -1,4 +1,4 @@
-apiVersion: eurek8s.eurek8s.github.io/v1
+apiVersion: eurek8s.github.io/v1
 kind: EurekaApplication
 metadata:
   name: eurekaapplication-sample

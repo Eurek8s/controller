@@ -3,6 +3,7 @@
 # It should be run by config/default
 resources:
 - bases/eurek8s.eurek8s.github.io_eurekaapplications.yaml
+- bases/eurek8s.github.io_eurekaapplications.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

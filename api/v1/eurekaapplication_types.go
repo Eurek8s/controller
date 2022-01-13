@@ -20,22 +20,47 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type EurekaApplicationPaths struct {
+	// +kubebuilder:validation:MinLength=0
+	// HealthCheck path to be registered in Eureka (i.e /actuator/health)
+	HealthCheck string `json:"healthcheck,omitempty"`
+
+	// +kubebuilder:validation:MinLength=0
+	// Home path to be registered in Eureka (i.e /)
+	Home string `json:"home,omitempty"`
+
+	// +kubebuilder:validation:MinLength=0
+	// Status path to be registered in Eureka (i.e /actuator/info)
+	Status string `json:"status,omitempty"`
+}
 
 // EurekaApplicationSpec defines the desired state of EurekaApplication
 type EurekaApplicationSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Enable/Disable specific instance
+	// +optional
+	Disabled bool `json:"disabled,omitempty"`
 
-	// Foo is an example field of EurekaApplication. Edit eurekaapplication_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Environment that should be used to register the instance
+	Environment string `json:"environment,omitempty"`
+
+	// +kubebuilder:validation:MinLength=0
+	// Name of the app to be registered in Eureka
+	AppName string `json:"appName,omitempty"`
+
+	// +kubebuilder:validation:MinLength=0
+	// Name of the ingress app to be registered in Eureka
+	IngressName string `json:"ingressName,omitempty"`
+
+	// Zone of the app to be registered in Eureka
+	Zone string `json:"zone,omitempty"`
+
+	// Paths to register along with the instance
+	Paths EurekaApplicationPaths `json:"paths,omitempty"`
 }
 
 // EurekaApplicationStatus defines the observed state of EurekaApplication
 type EurekaApplicationStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
