@@ -1,14 +1,14 @@
-domain: eurek8s.github.io
+domain: github.io
 layout:
 - go.kubebuilder.io/v3
-projectName: eurek8s-controller-v3
+projectName: eurek8s-controller
 repo: github.com/eurek8s/controller
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: eurek8s.github.io
+  domain: github.io
   group: eurek8s
   kind: EurekaApplication
   path: github.com/eurek8s/controller/api/v1
