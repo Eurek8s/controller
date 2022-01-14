@@ -16,5 +16,9 @@ jobs:
       - name: Build
         run: make docker-build IMG=ghcr.io/Eurek8s/eurek8s-controller:latest-main
 
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17.5' # The Go version to download (if necessary) and use.
+
       - name: Publish Image
         run: make docker-push IMG=ghcr.io/Eurek8s/eurek8s-controller:latest-main
