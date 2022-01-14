@@ -17,6 +17,8 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"flag"
 	"os"
 
@@ -24,6 +26,9 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	eurekaclient "github.com/eurek8s/controller/internal/eureka/client"
+	eurekahandler "github.com/eurek8s/controller/internal/eureka/handler"
+	eurek8ssyncer "github.com/eurek8s/controller/internal/eureka/sync"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -65,6 +70,30 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
+	// eurek8s config
+	config := os.Getenv("CONFIG")
+	if config == "" {
+		setupLog.Error(errors.New("config not found"), "unable to configure eureka client")
+		os.Exit(1)
+	}
+
+	eurekaAddresses := make(map[string][]string)
+	err := json.Unmarshal([]byte(config), &eurekaAddresses)
+	if err != nil || len(eurekaAddresses) == 0 {
+		setupLog.Error(errors.New("empty config"), "unable to use the provided configuration")
+		os.Exit(1)
+	}
+
+	syncer := eurek8ssyncer.New(
+		eurekaclient.New(eurekaAddresses),
+		ctrl.Log.WithName("syncer"),
+	)
+	handler := eurekahandler.New(syncer, ctrl.Log.WithName("handler"))
+
+	syncer.Start()
+
+	// eurek8s config end
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -79,8 +108,11 @@ func main() {
 	}
 
 	if err = (&controllers.EurekaApplicationReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:        mgr.GetClient(),
+		Log:           ctrl.Log.WithName("controllers").WithName("EurekaApplication"),
+		Scheme:        mgr.GetScheme(),
+		EventRecorder: mgr.GetEventRecorderFor("eurek8s-controller"),
+		EurekaHandler: handler,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "EurekaApplication")
 		os.Exit(1)

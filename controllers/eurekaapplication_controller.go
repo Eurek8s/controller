@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	eurekahandler "github.com/eurek8s/controller/internal/eureka/handler"
+	"github.com/go-logr/logr"
+	"k8s.io/client-go/tools/record"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -30,7 +33,10 @@ import (
 // EurekaApplicationReconciler reconciles a EurekaApplication object
 type EurekaApplicationReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Log           logr.Logger
+	Scheme        *runtime.Scheme
+	EventRecorder record.EventRecorder
+	EurekaHandler *eurekahandler.Handler
 }
 
 //+kubebuilder:rbac:groups=discovery.eurek8s.com,resources=eurekaapplications,verbs=get;list;watch;create;update;patch;delete
