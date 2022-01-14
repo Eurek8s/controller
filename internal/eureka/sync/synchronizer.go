@@ -8,7 +8,6 @@ import (
 	"github.com/hudl/fargo"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
-	"sync"
 	"time"
 )
 
