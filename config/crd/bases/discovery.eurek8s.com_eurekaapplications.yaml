@@ -16,7 +16,24 @@ spec:
     singular: eurekaapplication
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - description: Name of the eureka application
+      jsonPath: .spec.appName
+      name: App
+      type: string
+    - description: Environment key of the eureka application
+      jsonPath: .spec.environment
+      name: Environment
+      type: string
+    - description: Name of the ingress
+      jsonPath: .spec.ingressName
+      name: Ingress Name
+      type: string
+    - description: Last reconcile time for this resource
+      jsonPath: .status.lastReconcileTime
+      name: Last Reconcile
+      type: date
+    name: v1
     schema:
       openAPIV3Schema:
         description: EurekaApplication is the Schema for the eurekaapplications API

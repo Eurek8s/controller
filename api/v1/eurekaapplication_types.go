@@ -65,6 +65,10 @@ type EurekaApplicationStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="App",type=string,JSONPath=".spec.appName",description="Name of the eureka application"
+// +kubebuilder:printcolumn:name="Environment",type=string,JSONPath=".spec.environment",description="Environment key of the eureka application"
+// +kubebuilder:printcolumn:name="Ingress Name",type=string,JSONPath=".spec.ingressName",description="Name of the ingress"
+// +kubebuilder:printcolumn:name="Last Reconcile",type=date,JSONPath=".status.lastReconcileTime",description="Last reconcile time for this resource"
 
 // EurekaApplication is the Schema for the eurekaapplications API
 type EurekaApplication struct {

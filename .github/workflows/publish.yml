@@ -1,0 +1,20 @@
+name: Publish package to GitHub Packages
+on:
+  push:
+    branches:
+      - main
+#  release:
+#    types: [published]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: make docker-build IMG=ghcr.io/Eurek8s/eurek8s-controller:latest-main
+
+      - name: Publish Image
+        run: make docker-push IMG=ghcr.io/Eurek8s/eurek8s-controller:latest-main
