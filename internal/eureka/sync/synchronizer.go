@@ -2,11 +2,13 @@ package sync
 
 import (
 	"errors"
+	"fmt"
 	"github.com/eurek8s/controller/internal/eureka/client"
 	"github.com/go-logr/logr"
 	"github.com/hudl/fargo"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sync"
 	"time"
 )
 
@@ -63,57 +65,52 @@ func init() {
 	)
 }
 
-type Syncer struct {
-	client       *client.EurekaClient
-	applications map[string]*Application
-	liveChan     chan *Application
-	deadChan     chan string
-	log          logr.Logger
+type Synchronizer struct {
+	client         *client.EurekaClient
+	applications   map[string]*Application
+	registerChan   chan *Application
+	deregisterChan chan string
+	log            logr.Logger
 }
 
-func New(client *client.EurekaClient, log logr.Logger) *Syncer {
-	return &Syncer{
-		client:       client,
-		applications: make(map[string]*Application),
-		liveChan:     make(chan *Application),
-		deadChan:     make(chan string),
-		log:          log,
+func New(client *client.EurekaClient, log logr.Logger) *Synchronizer {
+	return &Synchronizer{
+		client:         client,
+		applications:   make(map[string]*Application),
+		registerChan:   make(chan *Application),
+		deregisterChan: make(chan string),
+		log:            log,
 	}
 }
 
-func (s *Syncer) Start() {
-	go s.process()
-}
-
-func (s *Syncer) Stop() {
-	close(s.liveChan)
-	close(s.deadChan)
-}
-
-func (s *Syncer) Register(app *Application) {
-	s.liveChan <- app
-}
-
-func (s *Syncer) Deregister(resourceName string) {
-	s.deadChan <- resourceName
-}
-
-func (s *Syncer) process() {
+func (s *Synchronizer) goProcess() {
 	tickChan := time.NewTicker(time.Second * 10).C
 
 	for {
 		select {
 		case _ = <-tickChan:
 			s.heartbeat()
-		case application := <-s.liveChan:
-			s.register(application)
-		case key := <-s.deadChan:
+		case application := <-s.registerChan:
+			if err := s.RegisterApplicationSync(application); err != nil {
+				s.log.Error(err, "Error trying to Register App (Channel)")
+			}
+		case key := <-s.deregisterChan:
 			s.deregister(key)
 		}
 	}
 }
 
-func (s *Syncer) heartbeat() {
+func (s *Synchronizer) Register(app *Application) {
+	s.registerChan <- app
+}
+
+func (s *Synchronizer) Deregister(resourceName string) {
+	s.deregisterChan <- resourceName
+}
+
+func (s *Synchronizer) heartbeat() {
+
+
 	for _, app := range s.applications {
 		for _, i := range app.Instances {
 			uniqueId := i.UniqueID(*i)
@@ -136,10 +133,10 @@ func (s *Syncer) heartbeat() {
 	}
 }
 
-func (s *Syncer) register(n *Application) {
+func (s *Synchronizer) RegisterApplicationSync(n *Application) error {
 	resourceName := n.ResourceName
 
-	if app, ok := s.applications[resourceName]; !ok {
+	if app, contains := s.applications[resourceName]; !contains {
 		for _, i := range n.Instances {
 			uniqueId := i.UniqueID(*i)
 
@@ -156,10 +153,14 @@ func (s *Syncer) register(n *Application) {
 				registrationFailures.
 					WithLabelValues(n.Environment, n.Name, uniqueId).
 					Inc()
+
+				return errors.New(fmt.Sprintf("error trying to register new application. Resource: %s", resourceName))
 			} else {
 				s.applications[resourceName] = n
+				return nil
 			}
 		}
+		return errors.New(fmt.Sprintf("error. Invalid application. No instances set to be registered. Resource: %s", resourceName))
 	} else {
 		instances := getInstancesToDeregister(app.Instances, n.Instances)
 
@@ -168,11 +169,11 @@ func (s *Syncer) register(n *Application) {
 		}
 
 		delete(s.applications, resourceName)
-		s.register(n)
+		return s.RegisterApplicationSync(n)
 	}
 }
 
-func (s *Syncer) deregister(key string) {
+func (s *Synchronizer) deregister(key string) {
 	if app, ok := s.applications[key]; !ok {
 		s.log.Error(errors.New("unable to deregister app"), "app not found", "key", key)
 	} else {
@@ -184,7 +185,7 @@ func (s *Syncer) deregister(key string) {
 	}
 }
 
-func (s *Syncer) deregisterInstance(app *Application, i *fargo.Instance) {
+func (s *Synchronizer) deregisterInstance(app *Application, i *fargo.Instance) {
 	uniqueId := i.UniqueID(*i)
 
 	totalDeregistrations.
@@ -201,6 +202,15 @@ func (s *Syncer) deregisterInstance(app *Application, i *fargo.Instance) {
 			WithLabelValues(app.Environment, app.Name, uniqueId).
 			Inc()
 	}
+}
+
+func (s *Synchronizer) Start() {
+	go s.goProcess()
+}
+
+func (s *Synchronizer) Stop() {
+	close(s.registerChan)
+	close(s.deregisterChan)
 }
 
 func getInstancesToDeregister(old, new []*fargo.Instance) []*fargo.Instance {

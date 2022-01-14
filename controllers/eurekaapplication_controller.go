@@ -18,23 +18,31 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	discoveryv1 "github.com/eurek8s/controller/api/v1"
 	eurekahandler "github.com/eurek8s/controller/internal/eureka/handler"
 	"github.com/go-logr/logr"
-	"k8s.io/client-go/tools/record"
-
+	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	"time"
+)
 
-	discoveryv1 "github.com/eurek8s/controller/api/v1"
+const (
+	eventType           = v1.EventTypeWarning
+	eventReasonNotFound = "NotFound"
 )
 
 // EurekaApplicationReconciler reconciles a EurekaApplication object
 type EurekaApplicationReconciler struct {
 	client.Client
-	Log           logr.Logger
-	Scheme        *runtime.Scheme
+	Log    logr.Logger
+	Scheme *runtime.Scheme
+
 	EventRecorder record.EventRecorder
 	EurekaHandler *eurekahandler.Handler
 }
@@ -43,19 +51,43 @@ type EurekaApplicationReconciler struct {
 //+kubebuilder:rbac:groups=discovery.eurek8s.com,resources=eurekaapplications/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=discovery.eurek8s.com,resources=eurekaapplications/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the EurekaApplication object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *EurekaApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := r.Log.WithValues("eurekaapplication", req.NamespacedName)
+	log.Info("Received reconcile event")
 
-	// TODO(user): your logic here
+	var eurekaApp discoveryv1.EurekaApplication
+	if err := r.Get(ctx, req.NamespacedName, &eurekaApp); err != nil {
+		// we'll ignore not-found errors, since they can't be fixed by an immediate
+		// requeue (we'll need to wait for a new notification), and we can get them
+		// on deleted requests.
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	if err := r.EurekaHandler.Handle(ctx, r.Client, &eurekaApp, req.String()); err != nil {
+		if apierrors.IsNotFound(err) {
+			switch t := err.(type) {
+			case apierrors.APIStatus:
+				d := t.Status().Details
+				message := fmt.Sprintf("Referenced object not found %s/%s", d.Kind, d.Name)
+				r.EventRecorder.Event(&eurekaApp, eventType, eventReasonNotFound, message)
+			default:
+				r.EventRecorder.Event(&eurekaApp, eventType, eventReasonNotFound, "Referenced object not found")
+			}
+
+			log.Error(err, "unable to fetch resource")
+		}
+
+		//return ctrl.Result{RequeueAfter: 30 * time.Second}, client.IgnoreNotFound(err)
+		r.Log.Info("re-queueing to run after 30s...")
+		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+	} else {
+		eurekaApp.Status.LastReconcileTime = &metav1.Time{Time: time.Now()}
+		log.Info("updating EurekaApplication lastReconcileTime...")
+		if err := r.Status().Update(ctx, &eurekaApp); err != nil {
+			log.Error(err, "unable to update eureka application status")
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }

@@ -31,11 +31,11 @@ const (
 )
 
 type Handler struct {
-	EurekaSyncer *eurek8ssyncer.Syncer
+	EurekaSyncer *eurek8ssyncer.Synchronizer
 	log          logr.Logger
 }
 
-func New(syncer *eurek8ssyncer.Syncer, log logr.Logger) *Handler {
+func New(syncer *eurek8ssyncer.Synchronizer, log logr.Logger) *Handler {
 	return &Handler{EurekaSyncer: syncer, log: log}
 }
 
@@ -44,6 +44,7 @@ type hostPort struct {
 	port int32
 }
 
+// TODO split ingress retrieval from eureka registering
 func (h *Handler) Handle(
 	ctx context.Context,
 	c client.Client,
@@ -81,10 +82,10 @@ func (h *Handler) Handle(
 
 	if disabled {
 		h.EurekaSyncer.Deregister(resourceName)
-	} else if app, err := getEurekaApplication(ctx, c, spec, environment, resourceName); err != nil {
+	} else if app, err := getEurekaApplication(ctx, c, spec, environment, resourceName, h.log); err != nil {
 		return err
-	} else {
-		h.EurekaSyncer.Register(app)
+	} else if err := h.EurekaSyncer.RegisterApplicationSync(app); err != nil {
+		return err
 	}
 
 	return nil
@@ -130,6 +131,7 @@ func getEurekaApplication(
 	spec *discoveryv1.EurekaApplication,
 	environment string,
 	resourceName string,
+	logger logr.Logger,
 ) (*eurek8ssyncer.Application, error) {
 	zone := spec.Spec.Zone
 	if zone == "" {
@@ -144,6 +146,7 @@ func getEurekaApplication(
 	var ingress networkingv1.Ingress
 	nn := types.NamespacedName{Namespace: spec.Namespace, Name: spec.Spec.IngressName}
 	if err := c.Get(ctx, nn, &ingress); err != nil {
+		logger.Error(err, "Error retrieving Ingress...")
 		return nil, err
 	}
 
