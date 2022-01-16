@@ -18,14 +18,14 @@ jobs:
         with:
           go-version: '^1.17.5' # The Go version to download (if necessary) and use.
 
-      - name: Build
-        run: make docker-build IMG=eurek8s/controller:latest-main
-
       - name: Log in to Docker Hub
         uses: docker/login-action@42d299face0c5c43a0487c477f595ac9cf22f1a7
         with:
-          username: ${{ secrets.DOCKER_HUB__USERNAME }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Build
+        run: make docker-build IMG=eurek8s/controller:latest-main
 
       - name: Publish Image
         run: make docker-push IMG=eurek8s/controller:latest-main
