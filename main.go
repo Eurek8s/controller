@@ -77,6 +77,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	setupLog.Info("Loaded config: " + config)
+
 	eurekaAddresses := make(map[string][]string)
 	err := json.Unmarshal([]byte(config), &eurekaAddresses)
 	if err != nil || len(eurekaAddresses) == 0 {
