@@ -22,7 +22,7 @@ jobs:
         run: make docker-build IMG=eurek8s/controller:latest-main
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@42d299face0c5c43a0487c477f595ac9cf22f1a7
         with:
           username: ${{ secrets.DOCKER_HUB__USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
