@@ -1,0 +1,15 @@
+name: Publish package to GitHub Packages
+on:
+  pull_request:
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17.5' # The Go version to download (if necessary) and use.
+
+      - name: Build
+        run: make docker-build IMG=eurek8s/controller:pr

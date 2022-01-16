@@ -1,18 +1,20 @@
 name: Publish package to GitHub Packages
 on:
-  push:
-    branches:
-      - main
-#  release:
-#    types: [published]
+  release:
+    types: [ published ]
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v2
+
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+
+      - name: Show version
+        run:
+          echo "Building version ${{ steps.get_version.outputs.VERSION }}"
 
       - uses: actions/setup-go@v2
         with:
@@ -25,7 +27,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build
-        run: make docker-build IMG=eurek8s/controller:latest-main
+        run: make docker-build IMG=eurek8s/controller:${{ steps.get_version.outputs.VERSION }}
 
       - name: Publish Image
-        run: make docker-push IMG=eurek8s/controller:latest-main
+        run: make docker-push IMG=eurek8s/controller:${{ steps.get_version.outputs.VERSION }}
