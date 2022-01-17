@@ -1,0 +1,101 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.7.0
+  creationTimestamp: null
+  name: eurekaapplications.discovery.eurek8s.com
+spec:
+  group: discovery.eurek8s.com
+  names:
+    kind: EurekaApplication
+    listKind: EurekaApplicationList
+    plural: eurekaapplications
+    singular: eurekaapplication
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Name of the eureka application
+      jsonPath: .spec.appName
+      name: App
+      type: string
+    - description: Environment key of the eureka application
+      jsonPath: .spec.environment
+      name: Environment
+      type: string
+    - description: Name of the ingress
+      jsonPath: .spec.ingressName
+      name: Ingress Name
+      type: string
+    - description: Last reconcile time for this resource
+      jsonPath: .status.lastReconcileTime
+      name: Last Reconcile
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: EurekaApplication is the Schema for the eurekaapplications API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EurekaApplicationSpec defines the desired state of EurekaApplication
+            properties:
+              appName:
+                description: Name of the app to be registered in Eureka
+                minLength: 0
+                type: string
+              disabled:
+                description: Enable/Disable specific instance
+                type: boolean
+              environment:
+                description: Environment that should be used to register the instance
+                type: string
+              ingressName:
+                description: Name of the ingress app to be registered in Eureka
+                minLength: 0
+                type: string
+              paths:
+                description: Paths to register along with the instance
+                properties:
+                  healthcheck:
+                    description: HealthCheck path to be registered in Eureka (i.e /actuator/health)
+                    minLength: 0
+                    type: string
+                  home:
+                    description: Home path to be registered in Eureka (i.e /)
+                    minLength: 0
+                    type: string
+                  status:
+                    description: Status path to be registered in Eureka (i.e /actuator/info)
+                    minLength: 0
+                    type: string
+                type: object
+              zone:
+                description: Zone of the app to be registered in Eureka
+                type: string
+            type: object
+          status:
+            description: EurekaApplicationStatus defines the observed state of EurekaApplication
+            properties:
+              lastReconcileTime:
+                format: date-time
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
