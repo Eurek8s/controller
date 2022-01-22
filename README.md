@@ -3,7 +3,7 @@
 ![image](https://github.com/Eurek8s/controller/blob/main/docs/static/logo.png?raw=true)
 
 Eurek8s is a controller to help using Netflix's Eureka with Kubernetes or just to help during the migration of Eureka to
-Kubernetes services, for example.
+another solution.
 
 ## Developing
 
