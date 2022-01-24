@@ -15,7 +15,7 @@ Eurek8s.
 ## Configuring
 
 Eurek8s has only one configuration: the CONFIG environment variable.
-This setting expects a JSON containging a map of Eureka clusters.
+This setting expects a JSON containging a map of Eureka clusters and their instances addresses.
 For example:
 
 ```
