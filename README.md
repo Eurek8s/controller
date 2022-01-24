@@ -5,6 +5,23 @@
 Eurek8s is a controller to help using Netflix's Eureka with Kubernetes or just to help during the migration of Eureka to
 another solution.
 
+## Installing
+
+### Helm
+
+There is a [Helm Chart](https://github.com/Eurek8s/helm-charts/tree/main/charts/eurek8s-controller) to help you install
+Eurek8s.
+
+## Configuring
+
+Eurek8s has only one configuration: the CONFIG environment variable.
+This setting expects a JSON containging a map of Eureka clusters.
+For example:
+
+```
+CONFIG='{"qa":["http://qa1.example.com","http://qa2.example.com"],"staging":["http://staging1.example.com"]}'
+```
+
 ## Developing
 
 ### Running and deploying the controller
